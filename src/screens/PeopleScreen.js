@@ -3,6 +3,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Alert,
   View,
 } from 'react-native';
 import { Icon } from "react-native-elements";
