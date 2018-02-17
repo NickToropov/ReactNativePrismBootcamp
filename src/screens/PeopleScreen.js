@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet,
   Text,
   TextInput,
   Alert,
   View,
 } from 'react-native';
+import { connect } from 'react-redux';
 import { Icon } from "react-native-elements";
-import PropTypes from 'prop-types';
 import PeopleList from '../components/PeopleList'
 import styles from '../styles/styles';
 import LogoutButton from '../components/LogoutButton';
+import * as peopleActions from '../actions/peopleActions';
 
-export default class PeopleScreen extends React.Component {
+class PeopleScreen extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
         return {
@@ -22,18 +22,13 @@ export default class PeopleScreen extends React.Component {
             tabBarIcon: ({ focused, tintColor }) => {
                 return <Icon name="people" size={28} color={tintColor} />;
             },
-            tabBarLabel: ({ focused, tintColor }) => { 
-                return <Text style={[styles.tabBarLabel, {color: tintColor}]}>People</Text>;
-            }
         }
     };
 
     _items = []
 
     _loadData() {
-        const {store} = this.context;
-        const state = store.getState();
-        store.dispatch({type: 'LOADING'});
+        this.props.loading();
 
         fetch('http://prism.akvelon.net/api/employees/all')
             .then((r) => {
@@ -51,41 +46,29 @@ export default class PeopleScreen extends React.Component {
                         dislocation: p.Dislocation,
                         avatarUrl: 'http://prism.akvelon.net/api/system/getphoto/' + p.Id
                     };
-                });
+                }).sort((p1,p2) => (p1.lastName + ' ' + p1.firstName).localeCompare(p2.lastName + ' ' + p2.firstName));
             })
             .then((people) => {
-                store.dispatch({type: 'LOADED'});
                 this._items = people;
+                this.props.loaded();                
             })
             .catch((err) => {
-                store.dispatch({type: 'LOADED', error: err});
+                this.props.loaded(err);
                 Alert.alert(err.message);
             });
     }
 
-    _filter(filter = '') {
-        const {store} = this.context;
-        store.dispatch({type: 'FILTER', filter});
-    }
-
     componentDidMount() {
-        const {store} = this.context;
-        this.unsubscribe = store.subscribe(() => this.forceUpdate());
         this._loadData();
-    }
-    componentWillUnmount() {
-        this.unsubscribe();
     }
 
     render() {
-        const {store} = this.context;
-        const state = store.getState();
         return (
             <View style={{flex: 1, alignItems: 'stretch'}}>
                 <View style={{flexDirection: 'row'}}>
                     <Icon name="search" containerStyle={{paddingLeft: 10}} />
-                    <TextInput style={{flex: 1}} placeholder={'Find...'} onChangeText={(val) => this._filter(val)} value={state.people.filter} />
-                    <Icon name="clear" onPress={() => this._filter()} containerStyle={{padding: 10}} />
+                    <TextInput style={{flex: 1}} placeholder={'Find...'} onChangeText={this.props.filter} value={this.props.people.filter} />
+                    <Icon name="clear" onPress={() => this.props.filter()} containerStyle={{padding: 10}} />
                 </View>
                 <PeopleList items={this._items} />
             </View>
@@ -93,7 +76,18 @@ export default class PeopleScreen extends React.Component {
     }
 };
 
+function mapSateToProps(state, ownProps) {
+    return {
+        people: state.people
+    }
+}
 
-PeopleScreen.contextTypes = {
-    store: PropTypes.object
-};
+function mapDispatchToProps(dispatch) {
+    return {
+        loading: () => dispatch(peopleActions.loading()),
+        loaded: error => dispatch(peopleActions.loaded(error)),
+        filter: filter => dispatch(peopleActions.filter(filter)),
+    };
+}
+
+export default connect(mapSateToProps, mapDispatchToProps) (PeopleScreen);

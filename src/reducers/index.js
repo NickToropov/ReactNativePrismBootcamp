@@ -1,19 +1,20 @@
 import { LOAD, SAVE } from 'redux-storage';
+import * as types from '../actions/actionTypes';
 import { NavigationActions } from 'react-navigation';
 
 export const auth = (state = {}, action) => {
     switch (action.type) {
-        case 'LOGGING': return {... state, isLogging: true};
-        case 'LOGIN': return {... state, name: action.name, isLogging: false};
-        case 'LOGOUT': return {};
+        case types.LOGGING: return {... state, isLogging: true};
+        case types.LOGIN: return {... state, name: action.user.name, isLogging: false};
+        case types.LOGOUT: return {};
         default: return state;
     }
 }
 
 export const people = (state = {isLoading: false, filter: '', error:{}}, action) => {
     switch (action.type) {
-        case 'LOADING': return {... state, isLoading: true };
-        case 'LOADED':
+        case types.PEOPLE_LOADING: return {... state, isLoading: true };
+        case types.PEOPLE_LOADED:
             return { ... state,
                 isLoading: false,
                 error: Object.assign({}, action.error),
@@ -28,7 +29,7 @@ export const people = (state = {isLoading: false, filter: '', error:{}}, action)
                 //         avatarUrl: 'http://prism.akvelon.net/api/system/getphoto/' + r.Id};
                 //     }) : []
             };
-        case 'FILTER': 
+        case types.PEOPLE_FILTER: 
             return {...state, filter: action.filter};
         default:
             return state;
@@ -37,8 +38,12 @@ export const people = (state = {isLoading: false, filter: '', error:{}}, action)
 
 export const myteam = (state = [], action) => {
     switch(action.type) {
-        case 'ADD_TO_MY_TEAM': return state.find((p) => p.id == action.person.id) ? state : [...state, action.person].sort((p1,p2) => (p1.lastName + ' ' + p1.firstName).localeCompare(p2.lastName + ' ' + p2.firstName));
-        case 'DELETE_FROM_MY_TEAM': return state.filter((p) => p.id != action.person.id);
+        case types.ADD_TO_MY_TEAM: 
+            return state.find((p) => p.id == action.person.id) 
+                ? state 
+                : [...state, Object.assign({}, action.person)].sort((p1,p2) => (p1.lastName + ' ' + p1.firstName).localeCompare(p2.lastName + ' ' + p2.firstName));
+        case types.REMOVE_FROM_MY_TEAM:
+            return state.filter((p) => p.id != action.person.id);
         default: return state;
     }    
 }

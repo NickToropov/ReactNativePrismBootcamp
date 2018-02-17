@@ -1,27 +1,32 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Text } from 'react-native';
 import { NavigationActions } from 'react-navigation';
-import PropTypes from 'prop-types';
 import styles from '../styles/styles';
+import { connect } from 'react-redux';
+import * as loginActions from '../actions/loginActions';
 
-export default class LogoutButton extends React.Component {
+class LogoutButton extends React.Component {
+    static goToToLoginScreenAction = NavigationActions.reset({
+        index: 0,
+        actions: [
+            NavigationActions.navigate({ routeName: 'LoginScreen'})
+        ]
+    });
 
     _logOut() {
-        const {store} = this.context; 
-        store.dispatch({type: 'LOGOUT'});
-        this.props.navigation.dispatch(NavigationActions.reset({
-            index: 0,
-            actions: [
-                NavigationActions.navigate({ routeName: 'LoginScreen'})
-            ]
-        })); 
+        this.props.logout();
+        this.props.navigation.dispatch(LogoutButton.goToToLoginScreenAction); 
     }
 
     render() {
-        return <Text style={[styles.actionBarButton, { }]} onPress={() => {this._logOut();}}>Logout</Text>;
+        return <Text style={[styles.actionBarButton, { }]} onPress={() => this._logOut()}>Logout</Text>;
     }
 }
 
-LogoutButton.contextTypes = {
-    store: PropTypes.object
-};
+function mapDispatchToProps(dispatch) {
+    return {
+        logout: () => dispatch(loginActions.logout())
+    };
+}
+
+export default connect(null, mapDispatchToProps)(LogoutButton);

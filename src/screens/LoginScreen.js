@@ -1,21 +1,19 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet,
-  Text,
-  Image,
   View,
+  Text,
   Alert,
   TextInput,
-  ScrollView,
   ActivityIndicator,
   Button
 } from 'react-native';
+import { connect } from 'react-redux';
 import { NavigationActions } from 'react-navigation';
 import { Card, FormLabel } from 'react-native-elements';
-import PropTypes from 'prop-types';
 import styles from '../styles/styles';
+import * as loginActions from '../actions/loginActions';
 
-export default class LoginScreen extends React.Component {
+class LoginScreen extends React.Component {
 
     _form = {email: '', email_err: '', pwd:'', pwd_err: ''};
 
@@ -32,14 +30,16 @@ export default class LoginScreen extends React.Component {
                     NavigationActions.navigate({ routeName: 'HomeScreen'})
                 ]
             });
+
+        this._logIn = this._logIn.bind(this);
+        this._validateInputs = this._validateInputs.bind(this);
     }
 
     _logIn() {
         if (!this._validateInputs())
             return;
 
-        const {store} = this.context;
-        store.dispatch({type: 'LOGGING'});
+        this.props.logging();
 
         new Promise((resolve) => {
             setTimeout(resolve, 1000)
@@ -49,11 +49,11 @@ export default class LoginScreen extends React.Component {
                 throw {message: 'Invalid login or password'};
             }
 
-            store.dispatch({type: 'LOGIN', name: 'Demo user'});
+            this.props.login({name: 'Demo user'});
             this.props.navigation.dispatch(this.goToHomeScreenAction)
         })
         .catch((err) => {
-            store.dispatch({type: 'LOGIN', name: ''});
+            this.props.login({});
             Alert.alert(err.message);
         });
     }
@@ -77,19 +77,7 @@ export default class LoginScreen extends React.Component {
         return true;
     }
 
-    componentDidMount() {
-        const {store} = this.context;
-        this.unsubscribe = store.subscribe(() => this.forceUpdate());
-    }
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
-
     render() {
-        const { navigate } = this.props.navigation;
-        const { store } = this.context;
-        const state = store.getState();
-
         return (
             <View style={{flex:1, justifyContent: 'center'}}>
                 <Card title="Login into Prism"
@@ -101,11 +89,11 @@ export default class LoginScreen extends React.Component {
                     {this._form.email_err ? <Text style={styles.inputErrorMsg}>{this._form.email_err}</Text>:<Text />}
                     <TextInput secureTextEntry placeholder="Password..." onChangeText={(val) => this._form.pwd = val} />
                     {this._form.pwd_err ? <Text style={styles.inputErrorMsg}>{this._form.pwd_err}</Text>:<Text />}
-                    {state.auth.isLogging ? (
+                    {this.props.auth.isLogging ? (
                         <ActivityIndicator size="large" />
                     ) : (
                         <View style={{alignSelf: 'flex-end'}} >
-                            <Button title="Login" onPress={() => {this._logIn();}} />
+                            <Button title="Login" onPress={this._logIn} />
                         </View>
                     )}
                 </Card>
@@ -114,6 +102,17 @@ export default class LoginScreen extends React.Component {
     }
 }
 
-LoginScreen.contextTypes = {
-    store: PropTypes.object
-};
+function mapStateToProps(state, ownProps) {
+    return {
+        auth: state.auth
+    }
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        logging: () => dispatch(loginActions.logging()),
+        login: user => dispatch(loginActions.login(user))
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps) (LoginScreen);

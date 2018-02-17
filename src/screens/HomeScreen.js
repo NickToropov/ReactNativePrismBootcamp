@@ -1,16 +1,15 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet,
   Text,
   View,
   Button,
 } from 'react-native';
 import { NavigationActions } from 'react-navigation';
-import PropTypes from 'prop-types';
 import styles from '../styles/styles';
 import LogoutButton from '../components/LogoutButton';
+import { connect } from 'react-redux';
 
-export default class HomeScreen extends React.Component {
+class HomeScreen extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
         return {
@@ -20,30 +19,19 @@ export default class HomeScreen extends React.Component {
         }
     };
 
-    constructor(props) {
-        super(props);
-
-        this.goToLoginScreenAction = NavigationActions.reset({
-                index: 0,
-                actions: [
-                    NavigationActions.navigate({ routeName: 'LoginScreen'})
-                ]
-            });
-        
-    }
+    static goToLoginScreenAction = NavigationActions.reset({
+        index: 0,
+        actions: [ NavigationActions.navigate({ routeName: 'LoginScreen'}) ]
+    });
 
     componentDidMount() {
-        const {store} = this.context;
-        const state = store.getState();
-        if (!state.auth.name) {
-            this.props.navigation.dispatch(this.goToLoginScreenAction)
+        if (!this.props.auth.name) {
+            this.props.navigation.dispatch(HomeScreen.goToLoginScreenAction)
         }
     } 
 
     render() {
-        const {store} = this.context;
-        const state = store.getState();
-        if (!state.auth.name) {
+        if (!this.props.auth.name) {
             return <View />;
         }
 
@@ -54,13 +42,17 @@ export default class HomeScreen extends React.Component {
 
         return (
             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center',}}>
-                <Text style={{fontSize: 20, alignSelf: 'center'}}>Hello, {state.auth.name}</Text>
+                <Text style={{fontSize: 20, alignSelf: 'center'}}>Hello, {this.props.auth.name}</Text>
                 <Button title={"Continue"} style={{alignSelf: 'center'}} onPress={() => this.props.navigation.dispatch(goToMainScreenAction)} />
             </View>
         );
     }
 }
 
-HomeScreen.contextTypes = {
-    store: PropTypes.object
-};
+function mapStateToProps(state, ownProps) {
+    return {
+        auth: state.auth
+    }
+}
+
+export default connect(mapStateToProps) (HomeScreen);
