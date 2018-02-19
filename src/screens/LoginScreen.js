@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { NavigationActions } from 'react-navigation';
 import { Card, FormLabel } from 'react-native-elements';
 import styles from '../styles/styles';
-import * as loginActions from '../actions/loginActions';
+import * as authActions from '../actions/authActions';
 
 class LoginScreen extends React.Component {
 
@@ -39,23 +39,9 @@ class LoginScreen extends React.Component {
         if (!this._validateInputs())
             return;
 
-        this.props.logging();
-
-        new Promise((resolve) => {
-            setTimeout(resolve, 1000)
-        })
-        .then((r) => {
-            if (this._form.email != 't@ttt.tt' || this._form.pwd != '123') {
-                throw {message: 'Invalid login or password'};
-            }
-
-            this.props.login({name: 'Demo user'});
-            this.props.navigation.dispatch(this.goToHomeScreenAction)
-        })
-        .catch((err) => {
-            this.props.login({});
-            Alert.alert(err.message);
-        });
+        this.props.login(this._form.email, this._form.pwd)
+            .then(r => this.props.navigation.dispatch(this.goToHomeScreenAction))
+            .catch(err => Alert.alert(err.message));
     }
 
     _validateInputs() {
@@ -110,8 +96,7 @@ function mapStateToProps(state, ownProps) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        logging: () => dispatch(loginActions.logging()),
-        login: user => dispatch(loginActions.login(user))
+        login: (email, password) => dispatch(authActions.login(email, password))
     };
 }
 

@@ -3,7 +3,7 @@ import { Text } from 'react-native';
 import { NavigationActions } from 'react-navigation';
 import styles from '../styles/styles';
 import { connect } from 'react-redux';
-import * as loginActions from '../actions/loginActions';
+import * as authActions from '../actions/authActions';
 
 class LogoutButton extends React.Component {
     static goToToLoginScreenAction = NavigationActions.reset({
@@ -25,7 +25,7 @@ class LogoutButton extends React.Component {
 
 function mapDispatchToProps(dispatch) {
     return {
-        logout: () => dispatch(loginActions.logout())
+        logout: () => dispatch(authActions.logout())
     };
 }
 

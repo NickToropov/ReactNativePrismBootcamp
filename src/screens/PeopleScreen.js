@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native';
 import { connect } from 'react-redux';
-import { Icon } from "react-native-elements";
+import { Icon, Button } from "react-native-elements";
 import PeopleList from '../components/PeopleList'
 import styles from '../styles/styles';
 import LogoutButton from '../components/LogoutButton';
@@ -28,32 +28,8 @@ class PeopleScreen extends React.Component {
     _items = []
 
     _loadData() {
-        this.props.loading();
-
-        fetch('http://prism.akvelon.net/api/employees/all')
-            .then((r) => {
-                const body = JSON.parse(r._bodyText);
-                if (r.status !== 200) {
-                    throw body;
-                }
-                return body.map((p) => { 
-                    return {
-                        id: p.Id,
-                        firstName: p.FirstName,
-                        lastName: p.LastName,
-                        email: p.Mail,
-                        phone: p.Telephone,
-                        dislocation: p.Dislocation,
-                        avatarUrl: 'http://prism.akvelon.net/api/system/getphoto/' + p.Id
-                    };
-                }).sort((p1,p2) => (p1.lastName + ' ' + p1.firstName).localeCompare(p2.lastName + ' ' + p2.firstName));
-            })
-            .then((people) => {
-                this._items = people;
-                this.props.loaded();                
-            })
-            .catch((err) => {
-                this.props.loaded(err);
+        this.props.fetchPeople()
+            .catch(err => {
                 Alert.alert(err.message);
             });
     }
@@ -70,7 +46,7 @@ class PeopleScreen extends React.Component {
                     <TextInput style={{flex: 1}} placeholder={'Find...'} onChangeText={this.props.filter} value={this.props.people.filter} />
                     <Icon name="clear" onPress={() => this.props.filter()} containerStyle={{padding: 10}} />
                 </View>
-                <PeopleList items={this._items} />
+                <PeopleList />
             </View>
         );
     }
@@ -84,8 +60,7 @@ function mapSateToProps(state, ownProps) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        loading: () => dispatch(peopleActions.loading()),
-        loaded: error => dispatch(peopleActions.loaded(error)),
+        fetchPeople: () => dispatch(peopleActions.fetchPeople()),
         filter: filter => dispatch(peopleActions.filter(filter)),
     };
 }

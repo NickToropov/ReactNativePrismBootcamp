@@ -22,6 +22,7 @@ const PeopleList = props => {
             ):(
                 <FlatList data={filtered}
                     keyExtractor={(item) => item.id.toString()}
+                    extraData={props.myteam}
                     renderItem={({item}) =>
                         <View style={{flex: 1, flexDirection: 'row', paddingLeft: 10, paddingTop: 5, paddingBottom: 5}}>
                             <Avatar source={{uri: item.avatarUrl}} medium />
@@ -41,6 +42,7 @@ const PeopleList = props => {
 
 function mapStateToProps(state, ownProps) {
     return {
+        items: state.people.items,
         isLoading: state.people.isLoading,
         filter: state.people.filter,
         myteam: state.myteam

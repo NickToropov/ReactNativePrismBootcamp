@@ -4,30 +4,30 @@ import { NavigationActions } from 'react-navigation';
 
 export const auth = (state = {}, action) => {
     switch (action.type) {
-        case types.LOGGING: return {... state, isLogging: true};
-        case types.LOGIN: return {... state, name: action.user.name, isLogging: false};
-        case types.LOGOUT: return {};
-        default: return state;
+        case types.AUTH_LOGIN: 
+            return {... state, isLogging: true};
+        case types.AUTH_LOGIN_FAILED: 
+            return {... state, isLogging: false};
+        case types.AUTH_LOGIN_SUCCEDED: 
+            return {... state, isLogging: false, name: action.user.name};
+        case types.AUTH_LOGOUT: 
+            return {};
+        default: 
+            return state;
     }
 }
 
-export const people = (state = {isLoading: false, filter: '', error:{}}, action) => {
+export const people = (state = {items: [], isLoading: false, filter: ''}, action) => {
     switch (action.type) {
-        case types.PEOPLE_LOADING: return {... state, isLoading: true };
-        case types.PEOPLE_LOADED:
+        case types.REQUEST_PEOPLE: 
+            return {... state, isLoading: true };
+        case types.REQUEST_PEOPLE_FAILED: 
+            return {... state, isLoading: false };
+        case types.REQUEST_PEOPLE_SUCCEDED:
             return { ... state,
                 isLoading: false,
-                error: Object.assign({}, action.error),
-                // items: action.people ? action.people.map((r) => {
-                //     return {
-                //         id: r.Id,
-                //         firstName: r.FirstName,
-                //         lastName: r.LastName,
-                //         email: r.Mail,
-                //         phone: r.Telephone,
-                //         dislocation: r.Dislocation,
-                //         avatarUrl: 'http://prism.akvelon.net/api/system/getphoto/' + r.Id};
-                //     }) : []
+                error: {},
+                items: [...action.people]
             };
         case types.PEOPLE_FILTER: 
             return {...state, filter: action.filter};
