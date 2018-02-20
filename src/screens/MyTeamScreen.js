@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, View, FlatList } from 'react-native';
+import { Dimensions, Text, View, FlatList } from 'react-native';
 import { connect } from 'react-redux';
 import { default as MaterialIcon } from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from '../styles/styles';
