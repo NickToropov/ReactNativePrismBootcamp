@@ -1,8 +1,13 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Text, View } from 'react-native';
 import { Avatar, Icon } from "react-native-elements";
 
-export default class PeopleListItem extends React.PureComponent {
+export default class PeopleListItem extends React.Component {
+    
+    shouldComponentUpdate(nextProps) {
+        return nextProps.isInMyTeam !== this.props.isInMyTeam;
+    }
+
     render() {
         return (
             <View style={{flex: 1, flexDirection: 'row', paddingLeft: 10, paddingTop: 5, paddingBottom: 5}}>
