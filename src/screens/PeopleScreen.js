@@ -4,6 +4,7 @@ import {
   TextInput,
   Alert,
   View,
+  ActivityIndicator
 } from 'react-native';
 import { connect } from 'react-redux';
 import { Icon, Button } from "react-native-elements";
@@ -25,8 +26,6 @@ class PeopleScreen extends React.Component {
         }
     };
 
-    _items = []
-
     _loadData() {
         this.props.fetchPeople()
             .catch(err => {
@@ -39,6 +38,9 @@ class PeopleScreen extends React.Component {
     }
 
     render() {
+        if (this.props.people.isLoading) {
+            return <ActivityIndicator style={{flex: 1}} size="large" />;
+        }
         return (
             <View style={{flex: 1, alignItems: 'stretch'}}>
                 <View style={{flexDirection: 'row'}}>
